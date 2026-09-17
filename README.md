@@ -445,7 +445,7 @@ http://localhost:8501
 Clone the repository:
 
 ```bash
-git clone <YOUR_GITHUB_REPOSITORY_URL>
+git clone https://github.com/Bheeshma21/dotmappers-ai-assessment.git
 cd dotmappers-ai-assessment
 ```
 
