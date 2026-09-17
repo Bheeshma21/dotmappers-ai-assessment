@@ -15,7 +15,7 @@ def test_anomaly_count():
 
     anomalies = detector.detect_anomalies()
 
-    assert len(anomalies) == 79
+    assert len(anomalies) == 145
 
 
 def test_anomaly_summary():
@@ -24,8 +24,8 @@ def test_anomaly_summary():
     summary = detector.get_summary()
 
     assert summary["total_tickets"] == 500
-    assert summary["anomaly_count"] == 79
-    assert summary["anomaly_percentage"] == 15.8
+    assert summary["anomaly_count"] == 145
+    assert summary["anomaly_percentage"] == 29.0
 
 
 def test_anomaly_thresholds():
@@ -39,9 +39,9 @@ def test_anomaly_thresholds():
 
     assert (
         thresholds[
-            "high_priority_delayed_response_threshold"
+            "unresolved_high_priority_age_threshold_hrs"
         ]
-        == 4
+        == 24
     )
 
 
@@ -52,6 +52,7 @@ def test_anomaly_columns():
 
     assert "is_anomaly" in anomalies.columns
     assert "anomaly_reasons" in anomalies.columns
+    assert "ticket_age_hrs" in anomalies.columns
 
 
 def test_anomaly_reasons_not_empty():
@@ -69,14 +70,15 @@ def test_anomaly_reasons_not_empty():
     )
 
 
-def test_high_priority_unresolved_detection():
+def test_unresolved_high_priority_detection():
     detector = get_detector()
 
     anomalies = detector.detect_anomalies()
 
     matching = anomalies[
         anomalies["anomaly_reasons"].str.contains(
-            "High-priority unresolved ticket",
+            "Unresolved high-priority ticket "
+            "older than 24 hours",
             regex=False,
         )
     ]
@@ -90,3 +92,17 @@ def test_high_priority_unresolved_detection():
     assert (
         matching["status"] != "Resolved"
     ).all()
+
+    assert (
+        matching["ticket_age_hrs"] > 24
+    ).all()
+
+
+def test_reference_time():
+    detector = get_detector()
+
+    reference_time = detector._reference_time()
+
+    assert str(reference_time) == (
+        "2024-03-30 18:06:00"
+    )
